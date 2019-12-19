@@ -38,9 +38,18 @@ prod_reqs = [
     'uwsgi'
 ]
 
-dev_reqs = [
-    'ipdb',
+test_reqs = [
+    'pytest',
+    'pytest-cov',
+    'pytest-factoryboy',
+]
+
+dev_reqs = test_reqs + [
+    'pip',
+    'setuptools',
     'wheel',
+    'ipython',
+    'ipdb',
     'werkzeug',
     'watchdog',
     'termcolor',
@@ -51,6 +60,7 @@ dev_reqs = [
     'flake8-comprehensions',
     'pep8-naming',
     'dlint',
+    'doc8',
 ]
 
 setup(
