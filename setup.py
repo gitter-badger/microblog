@@ -32,6 +32,9 @@ base_reqs = [
     'pony',
     'marshmallow',
     'python-dotenv',
+    'text-unidecode',
+    'markdown',
+    'click',
 ]
 
 prod_reqs = [
@@ -83,7 +86,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'polls=polls.cli:main',
+            'mbg=microblog.cli:cli',
         ]
     },
     python_requires='~=3.7',
