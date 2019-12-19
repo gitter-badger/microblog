@@ -11,8 +11,9 @@ PostIdent = namedtuple('PostIdent', ['a_slug', 'p_slug'])
 
 
 class Author(db.Entity):
-    name = orm.Required(str, 100, unique=True)
-    slug = orm.Required(str, 100)
+    name = orm.Required(str, 120, unique=True)
+    slug = orm.Required(str, 120)
+    password = orm.Required(str, 120)
     posts = orm.Set('Post')
 
     @property
@@ -36,6 +37,14 @@ class Post(db.Entity):
     @property
     def ident(self):
         return PostIdent(self.author.slug, self.slug)._asdict()
+
+
+class RevokedToken(db.Entity):
+    jti = orm.Required(str, 120, index=True)
+
+    @classmethod
+    def is_blacklisted(cls, jti: str) -> bool:
+        return cls.get(jti=jti) is not None
 
 
 db.bind(

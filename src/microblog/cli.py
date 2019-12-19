@@ -1,30 +1,17 @@
-import click
 from dotenv import find_dotenv, load_dotenv
-from werkzeug.serving import run_simple
+from flask.cli import FlaskGroup
 
-from .app import application
-
-
-@click.group()
-@click.version_option()
-@click.help_option()
-def cli():
-    load_dotenv(find_dotenv())
+from .app import make_app
 
 
-@cli.command()
-@click.option(
-    '-h', '--host', default='127.0.0.1', help='bind to specific network interface'
-)
-@click.option(
-    '-p', '--port', type=int, default=5000, help='listen on specific port number'
-)
-def run(host, port):
-    run_simple(
-        host, port, application, use_reloader=True, use_debugger=True,
-        reloader_type='watchdog',
-    )
+def create_app(info):
+    return make_app()
+
+
+cli = FlaskGroup(create_app=create_app)
+cli.help = 'Management script for Microblog backend application'
 
 
 if __name__ == '__main__':
+    load_dotenv(find_dotenv())
     cli()

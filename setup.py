@@ -28,7 +28,10 @@ def find_version(*file_paths):
 long_description = read('README.md')
 
 base_reqs = [
-    'falcon',
+    'Flask',
+    'Flask-RESTPlus',
+    'Flask-JWT-Extended',
+    'passlib[argon2]',
     'pony',
     'marshmallow',
     'python-dotenv',
@@ -44,6 +47,7 @@ prod_reqs = [
 test_reqs = [
     'pytest',
     'pytest-cov',
+    'pytest-flask',
     'pytest-factoryboy',
 ]
 

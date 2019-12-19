@@ -1,5 +1,5 @@
 <template>
-  <div id="container" class="flex one four-fifth center grow">
+  <div id="container" class="flex one three-fourth center grow">
     <nav>
       <router-link v-bind:to="{name: 'home'}" class="brand">Microblog</router-link>
       <input id="cmenug" type="checkbox" class="show">
