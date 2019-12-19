@@ -1,6 +1,6 @@
 from falcon import API
 
-from .resource import home_resource, post_resource
+from .resource import author_resource, home_resource, post_resource
 
 
 class Microblog(API):
@@ -9,6 +9,7 @@ class Microblog(API):
         super().__init__(*args, **kw)
         self.add_route('/api/recent', home_resource)
         self.add_route('/api/post/{author_slug}/{post_slug}', post_resource)
+        self.add_route('/api/author/{slug}', author_resource)
 
 
 def create_app():

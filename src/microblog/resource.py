@@ -1,9 +1,11 @@
+import json
+
 import falcon
 from falcon import Request, Response
 from pony import orm
 
-from .models import Post, Author
-from .schema import post_schema
+from .models import Author, Post
+from .schema import author_schema, post_schema
 
 
 class HomeResource:
@@ -20,7 +22,7 @@ home_resource = HomeResource()
 class PostResource:
 
     @orm.db_session
-    def on_get(self, req: Request, resp: Response, author_slug, post_slug):
+    def on_get(self, req: Request, resp: Response, author_slug: str, post_slug: str):
         author = Author.get(slug=author_slug)
         if author is None:
             raise falcon.HTTPNotFound()
@@ -31,3 +33,32 @@ class PostResource:
 
 
 post_resource = PostResource()
+
+
+class AuthorResource:
+
+    @orm.db_session
+    def on_get(self, req: Request, resp: Response, slug: str):
+        author = Author.get(slug=slug)
+        if author is None:
+            raise falcon.HTTPNotFound()
+        page = req.params.get('p', '1')
+        if not isinstance(page, str):
+            page = page[0]
+        try:
+            page = int(page)
+            if page < 1:
+                page = 1
+        except ValueError:
+            raise falcon.HTTPBadRequest()
+        posts = orm.select(
+            p for p in Post if p.author == author
+        ).order_by(orm.desc(Post.date)).page(page)
+        rv = {
+            'author': author_schema.dump(author),
+            'posts': post_schema.dump(posts, many=True)
+        }
+        resp.body = json.dumps(rv)
+
+
+author_resource = AuthorResource()
