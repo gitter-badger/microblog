@@ -25,7 +25,7 @@ class PostSchema(Schema, ComputedPK):
     slug = fields.Str(dump_only=True)
     text = fields.Str(required=True)
     text_html = fields.Str(dump_only=True)
-    date = fields.DateTime()
+    date = fields.DateTime(format='rfc')
 
 
 class PostIdentSchema(Schema):

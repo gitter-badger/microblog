@@ -15,6 +15,7 @@ const routes = [
     path: '/:author/:slug',
     name: 'post',
     component: Post,
+    props: true,
   },
 ];
 

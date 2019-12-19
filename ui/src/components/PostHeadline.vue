@@ -1,7 +1,7 @@
 <template>
   <div class="post-headline">
     <h2>{{ post.title }}</h2>
-    <h3>Published on {{ post.date }} by {{ post.author.name }}</h3>
+    <h3>Published on {{ new Date(post.date).toLocaleString() }} by {{ post.author.name }}</h3>
     <p>{{ post.summary }}</p>
     <p>
       <router-link
