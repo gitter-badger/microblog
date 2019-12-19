@@ -1,4 +1,5 @@
 import click
+from dotenv import find_dotenv, load_dotenv
 from werkzeug.serving import run_simple
 
 from .app import application
@@ -8,7 +9,7 @@ from .app import application
 @click.version_option()
 @click.help_option()
 def cli():
-    pass
+    load_dotenv(find_dotenv())
 
 
 @cli.command()

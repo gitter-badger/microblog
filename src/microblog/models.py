@@ -1,4 +1,5 @@
 import os
+from collections import namedtuple
 from datetime import datetime
 
 from pony import orm
@@ -6,10 +7,17 @@ from pony import orm
 db = orm.Database()
 
 
+PostIdent = namedtuple('PostIdent', ['a_slug', 'p_slug'])
+
+
 class Author(db.Entity):
     name = orm.Required(str, 100, unique=True)
     slug = orm.Required(str, 100)
     posts = orm.Set('Post')
+
+    @property
+    def post_idents(self):
+        return [p.ident for p in self.posts.order_by(orm.desc(Post.date))]
 
 
 class Post(db.Entity):
@@ -25,8 +33,13 @@ class Post(db.Entity):
     orm.composite_index(year, month)
     orm.composite_key(author, slug)
 
+    @property
+    def ident(self):
+        return PostIdent(self.author.slug, self.slug)._asdict()
+
 
 db.bind(
-    provider='sqlite', filename=os.environ.get('DB_FILENAME', ':memory'), create_db=True
+    provider='sqlite', filename=os.environ.get('DB_FILENAME', ':memory:'),
+    create_db=True,
 )
 db.generate_mapping(create_tables=True)

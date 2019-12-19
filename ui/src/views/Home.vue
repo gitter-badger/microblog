@@ -8,30 +8,26 @@
 </template>
 
 <script>
-import PostHeadline from '../components/PostHeadline.vue';
+import PostHeadline from '@/components/PostHeadline.vue';
 
 export default {
   name: 'Home',
   data() {
     return {
-      posts: [
-        {
-          title: 'title 1',
-          author: 'author1',
-          date: 'yesterday',
-          slug: 'title-1',
-          summary: 'post 1 summary',
-        },
-        {
-          title: 'title 2',
-          author: 'author2',
-          date: 'today morning',
-          slug: 'title-2',
-          summary: 'post 2 summary',
-        },
-      ],
+      posts: [],
     };
   },
   components: { PostHeadline },
+  methods: {
+    async fetchRecent() {
+      const url = '/recent';
+      const resp = await fetch(url);
+      const rv = await resp.json();
+      this.posts = rv;
+    },
+  },
+  created() {
+    this.fetchRecent();
+  },
 };
 </script>
