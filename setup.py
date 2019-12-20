@@ -30,18 +30,12 @@ long_description = read('README.md')
 base_reqs = [
     'Flask',
     'Flask-RESTFul',
-    'Flask-JWT-Extended',
-    'passlib[argon2]',
-    'pony',
-    'marshmallow',
+    'Marshmallow',
+    'Pony',
     'python-dotenv',
     'text-unidecode',
     'markdown',
     'click',
-]
-
-prod_reqs = [
-    'uwsgi'
 ]
 
 test_reqs = [
@@ -57,7 +51,7 @@ dev_reqs = test_reqs + [
     'wheel',
     'ipython',
     'ipdb',
-    'werkzeug',
+    'flask-shell-ipython',
     'watchdog',
     'termcolor',
     'flake8',
@@ -67,7 +61,6 @@ dev_reqs = test_reqs + [
     'flake8-comprehensions',
     'pep8-naming',
     'dlint',
-    'doc8',
 ]
 
 setup(
@@ -84,8 +77,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=base_reqs,
+    tests_require=test_reqs,
     extras_require={
-        'prod': prod_reqs,
         'dev': dev_reqs,
     },
     entry_points={
