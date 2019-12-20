@@ -29,9 +29,8 @@ long_description = read('README.md')
 
 base_reqs = [
     'Flask',
-    'Flask-RESTFul',
-    'Marshmallow',
     'Pony',
+    'Marshmallow',
     'python-dotenv',
     'text-unidecode',
     'markdown',
