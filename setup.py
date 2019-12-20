@@ -29,7 +29,7 @@ long_description = read('README.md')
 
 base_reqs = [
     'Flask',
-    'Flask-RESTPlus',
+    'Flask-RESTFul',
     'Flask-JWT-Extended',
     'passlib[argon2]',
     'pony',

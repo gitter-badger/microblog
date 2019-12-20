@@ -2,6 +2,7 @@ from flask import Flask
 
 from .ext import api, jwt, pony
 from .models import RevokedToken
+from . import resource
 
 
 def make_app():
@@ -10,7 +11,6 @@ def make_app():
     app.config['JWT_BLACKLIST_ENABLED'] = True
     app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
     configure_extenstions(app)
-    configure_resources()
     return app
 
 
@@ -23,8 +23,18 @@ def configure_extenstions(app: Flask):
         jti = decrypted_token['jti']
         return RevokedToken.is_blacklisted(jti)
 
+    configure_api(app)
+
+
+def configure_api(app: Flask):
+    api.add_resource(resource.RegisterResource, '/register')
+    api.add_resource(resource.UserLogin, '/login')
+    api.add_resource(resource.UserLogoutAccess, '/logout/access')
+    api.add_resource(resource.UserLogoutRefresh, '/logout/refresh')
+    api.add_resource(resource.TokenRefresh, '/token/refresh')
+    api.add_resource(resource.HomeResource, '/recent')
+    api.add_resource(
+        resource.PostResource, '/post/<string:author_slug>/<string:post_slug>',
+    )
+    api.add_resource(resource.AuthorResource, '/author/<string:slug>')
     api.init_app(app)
-
-
-def configure_resources():
-    from . import resource  # noqa: F401

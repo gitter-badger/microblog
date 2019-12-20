@@ -3,11 +3,10 @@ from flask_jwt_extended import (
     create_access_token, create_refresh_token, get_jwt_identity, get_raw_jwt,
     jwt_refresh_token_required, jwt_required,
 )
-from flask_restplus import Resource, reqparse
+from flask_restful import Resource, reqparse
 from passlib.context import CryptContext
 from pony import orm
 
-from .ext import api
 from .models import Author, Post, RevokedToken, db
 from .schema import author_schema, post_schema
 from .utils.text import slugify
@@ -19,7 +18,6 @@ parser.add_argument('password', help='This field can not be blank', required=Tru
 pwcontext = CryptContext(schemes=['argon2'])
 
 
-@api.route('/register')
 class RegisterResource(Resource):
 
     def post(self):
@@ -45,7 +43,6 @@ class RegisterResource(Resource):
             }
 
 
-@api.route('/login')
 class UserLogin(Resource):
 
     def post(self):
@@ -61,7 +58,6 @@ class UserLogin(Resource):
         }
 
 
-@api.route('/logout/access')
 class UserLogoutAccess(Resource):
 
     @jwt_required
@@ -76,7 +72,6 @@ class UserLogoutAccess(Resource):
             return {'message': 'access token revoked'}
 
 
-@api.route('/logout/refresh')
 class UserLogoutRefresh(Resource):
 
     @jwt_refresh_token_required
@@ -91,7 +86,6 @@ class UserLogoutRefresh(Resource):
             return {'message': 'refresh token revoked'}
 
 
-@api.route('/token/refresh')
 class TokenRefresh(Resource):
 
     @jwt_refresh_token_required
@@ -102,29 +96,6 @@ class TokenRefresh(Resource):
         }
 
 
-@api.route('/users')
-class AllUsers(Resource):
-
-    def get(self):
-        authors = Author.select()
-        return author_schema.dump(authors, many=True)
-
-    def delete(self):
-        Author.select().delete()
-        return {'message': 'all authors deleted'}
-
-
-@api.route('/secret')
-class SecretResource(Resource):
-
-    @jwt_required
-    def get(self):
-        return {
-            'answer': 42
-        }
-
-
-@api.route('/recent')
 class HomeResource(Resource):
 
     def get(self):
@@ -132,7 +103,6 @@ class HomeResource(Resource):
         return post_schema.dump(recent, many=True)
 
 
-@api.route('/post/<string:author_slug>/<string:post_slug>')
 class PostResource(Resource):
 
     def on_get(self, author_slug: str, post_slug: str):
@@ -145,7 +115,6 @@ class PostResource(Resource):
         return post_schema.dump(post)
 
 
-@api.route('/author/<string:slug>')
 class AuthorResource(Resource):
 
     def on_get(self, slug: str):
