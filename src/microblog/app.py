@@ -1,19 +1,19 @@
 from flask import Flask
 
-from .ext import pony
-from .api import api_bp
+from .ext import api, pony
 
 
 def make_app():
     app = Flask(__name__.split('.')[0])
     configure_extenstions(app)
-    configure_blueprints(app)
     return app
 
 
 def configure_extenstions(app: Flask):
     pony.init_app(app)
+    configure_resources()
+    api.init_app(app)
 
 
-def configure_blueprints(app: Flask):
-    app.register_blueprint(api_bp)
+def configure_resources():
+    from . import resource  # noqa: F401
