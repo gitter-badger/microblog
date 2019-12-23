@@ -32,7 +32,7 @@ export default {
   methods: {
     async registerAuthor(e) {
       e.preventDefault();
-      const url = '/api/authors';
+      const url = '/api/accounts';
       const data = { name: this.authorName };
       const resp = await fetch(url, {
         method: 'POST',
@@ -47,7 +47,7 @@ export default {
     },
     async checkNameAvailable() {
       const slug = slugify(this.authorName.toLowerCase());
-      const url = `/api/author/${slug}`;
+      const url = `/api/account/${slug}`;
       const resp = await fetch(url, {
         method: 'HEAD',
       });
