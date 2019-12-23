@@ -11,7 +11,7 @@ from ..schema import author_schema, post_schema
 from ..utils.text import md2html, slugify
 
 
-@api.resource('/recent', endpoint='recent')
+@api.resource('/posts/recent', endpoint='post.collection.recent')
 class RecentPostsCollection(Resource):
 
     def get(self) -> dict:
@@ -19,7 +19,7 @@ class RecentPostsCollection(Resource):
         return post_schema.dump(recent, many=True)
 
 
-@api.resource('/authors')
+@api.resource('/authors', endpoint='author.collection')
 class AuthorCollection(Resource):
 
     def get(self) -> dict:
@@ -30,7 +30,7 @@ class AuthorCollection(Resource):
         return author_schema.dump(authors, many=True)
 
 
-@api.resource('/author/<slug>', endpoint='author')
+@api.resource('/author/<slug>', endpoint='author.item')
 class AutorItem(Resource):
 
     def get(self, slug: str) -> dict:
@@ -40,7 +40,7 @@ class AutorItem(Resource):
         return author_schema.dump(author)
 
 
-@api.resource('/author/<slug>/posts', endpoint='author.posts')
+@api.resource('/author/<slug>/posts', endpoint='author.item.posts')
 class AuthorPostCollection(Resource):
 
     def get(self, slug: str) -> dict:
@@ -76,7 +76,7 @@ class AuthorPostCollection(Resource):
         return post_schema.dump(post), 201, headers
 
 
-@api.resource('/post/<author_slug>/<post_slug>', endpoint='post')
+@api.resource('/post/<author_slug>/<post_slug>', endpoint='post.item')
 class PostItem(Resource):
 
     def get(self, author_slug: str, post_slug: str) -> dict:

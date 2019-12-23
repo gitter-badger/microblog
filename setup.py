@@ -32,10 +32,12 @@ base_reqs = [
     'Flask-RESTFul',
     'Pony',
     'Marshmallow',
-    'python-dotenv',
+    'Flask-JWT-Extended',
+    'passlib[argon2]',
     'text-unidecode',
     'markdown',
     'click',
+    'python-dotenv',
 ]
 
 test_reqs = [

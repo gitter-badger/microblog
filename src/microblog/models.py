@@ -3,13 +3,27 @@ from datetime import datetime
 
 from pony import orm
 
+from .sec import pw_context
+
 db = orm.Database()
 
 
 class Author(db.Entity):
     name = orm.Required(str, 120, unique=True)
+    password = orm.Required(str, 120)
     slug = orm.Required(str, 120)
     posts = orm.Set('Post')
+
+    def check_password(self, password):
+        return pw_context.verify(password, self.password)
+
+
+class RevokedToken(db.Entity):
+    jti = orm.Required(str, 120)
+
+    @classmethod
+    def is_blacklisted(cls, jti: str) -> bool:
+        return cls.get(jti=jti) is not None
 
 
 class Post(db.Entity):

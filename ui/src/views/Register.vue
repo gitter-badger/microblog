@@ -9,6 +9,8 @@
         <p class="error-message" v-show="!nameAvailable">
           This name is already taken
         </p>
+        <label for="input-password">Password</label>
+        <input type="password" id="input-password" v-model="password">
         <button type="submit" class="primary" @click="registerAuthor" v-show="nameAvailable">
           Register
         </button>
@@ -26,6 +28,7 @@ export default {
   data() {
     return {
       authorName: '',
+      password: '',
       nameAvailable: true,
     };
   },
@@ -33,7 +36,10 @@ export default {
     async registerAuthor(e) {
       e.preventDefault();
       const url = '/api/accounts';
-      const data = { name: this.authorName };
+      const data = {
+        name: this.authorName,
+        password: this.password,
+      };
       const resp = await fetch(url, {
         method: 'POST',
         headers: {
@@ -42,7 +48,11 @@ export default {
         body: JSON.stringify(data),
       });
       if (resp.status === 201) {
+        const result = await resp.json();
         console.log('author created');
+        const storage = window.localStorage;
+        storage.setItem('access_token', result.access_token);
+        storage.setItem('refresh_token', result.refresh_token);
       }
     },
     async checkNameAvailable() {

@@ -25,5 +25,11 @@ class PostSchema(Schema, ComputedPK):
     date = fields.DateTime(format='rfc')
 
 
+class AccountSchema(Schema):
+    name = fields.Str(required=True)
+    password = fields.Str(required=True)
+
+
 author_schema = AuthorSchema()
 post_schema = PostSchema()
+account_schema = AccountSchema()

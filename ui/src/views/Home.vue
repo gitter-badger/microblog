@@ -20,7 +20,7 @@ export default {
   components: { PostHeadline },
   methods: {
     async fetchRecent() {
-      const url = '/api/recent';
+      const url = '/api/posts/recent';
       const resp = await fetch(url);
       const rv = await resp.json();
       this.posts = rv;
