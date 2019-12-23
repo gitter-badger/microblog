@@ -13,3 +13,7 @@ body #container {
 nav {
     position: absolute;
 }
+
+.error-message {
+    color: red;
+}

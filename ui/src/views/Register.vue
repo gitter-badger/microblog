@@ -6,8 +6,12 @@
       <div>
         <label for="input-name">Name</label>
         <input type="text" id="input-name" v-model="authorName" @change="checkNameAvailable">
-        <p id="name-check-result"></p>
-        <button type="submit" class="primary" @click="registerAuthor">Register</button>
+        <p class="error-message" v-show="!nameAvailable">
+          This name is already taken
+        </p>
+        <button type="submit" class="primary" @click="registerAuthor" v-show="nameAvailable">
+          Register
+        </button>
       </div>
     </form>
   </div>
@@ -22,6 +26,7 @@ export default {
   data() {
     return {
       authorName: '',
+      nameAvailable: true,
     };
   },
   methods: {
@@ -43,21 +48,11 @@ export default {
     async checkNameAvailable() {
       const slug = slugify(this.authorName.toLowerCase());
       const url = `/api/author/${slug}`;
-      const resp = await fetch(url);
-      const $el = document.getElementById('name-check-result');
-      if (resp.status !== 404) {
-        $el.innerText = 'This name is already taken';
-        $el.style.color = 'red';
-        $el.hidden = false;
-      } else {
-        $el.innerText = '';
-        $el.hidden = true;
-      }
+      const resp = await fetch(url, {
+        method: 'HEAD',
+      });
+      this.nameAvailable = (resp.status === 404);
     },
-  },
-  mounted() {
-    const $el = document.getElementById('name-check-result');
-    $el.hidden = true;
   },
 };
 </script>
