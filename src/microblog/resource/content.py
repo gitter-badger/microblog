@@ -71,7 +71,9 @@ class AuthorPostCollection(Resource):
         )
         db.commit()
         headers = {
-            'Location': url_for('post', author_slug=author.slug, post_slug=post.slug)
+            'Location': url_for(
+                'post.item', author_slug=author.slug, post_slug=post.slug
+            )
         }
         return post_schema.dump(post), 201, headers
 
