@@ -57,7 +57,7 @@ class AccountItem(Resource):
 @api.resource('/login', endpoint='account.login')
 class Login(Resource):
 
-    def post(self):
+    def post(self) -> dict:
         try:
             data = account_schema.load(request.get_json())
         except ValidationError as e:
@@ -75,7 +75,7 @@ class Login(Resource):
 class LogoutAccess(Resource):
 
     @jwt_required
-    def post(self):
+    def post(self) -> dict:
         jti = get_raw_jwt()['jti']
         RevokedToken(jti=jti)
         db.commit()
@@ -86,7 +86,7 @@ class LogoutAccess(Resource):
 class LogoutRefresh(Resource):
 
     @jwt_refresh_token_required
-    def post(self):
+    def post(self) -> dict:
         jti = get_raw_jwt()['jti']
         RevokedToken(jti=jti)
         db.commit()
@@ -97,5 +97,5 @@ class LogoutRefresh(Resource):
 class TokenRefresh(Resource):
 
     @jwt_refresh_token_required
-    def post(self):
+    def post(self) -> dict:
         return {'access_token': create_access_token(get_jwt_identity())}
