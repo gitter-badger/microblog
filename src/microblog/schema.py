@@ -11,14 +11,21 @@ class ComputedPK:
         return value
 
 
-class AuthorSchema(Schema, ComputedPK):
+class UserSchema(Schema, ComputedPK):
     name = fields.Str(required=True)
     slug = fields.Str(dump_only=True)
 
 
+class StreamSchema(Schema, ComputedPK):
+    name = fields.Str(required=True)
+    slug = fields.Str(dump_only=True)
+    description = fields.Str()
+    user = fields.Nested('UserSchema', only=['pk', 'slug', 'name'])
+
+
 class PostSchema(Schema, ComputedPK):
-    author = fields.Nested('AuthorSchema', only=['pk', 'slug', 'name'])
-    title = fields.Str(required=True)
+    stream = fields.Nested('StreamSchema', only=['pk', 'slug', 'name'])
+    title = fields.Str()
     slug = fields.Str(dump_only=True)
     text = fields.Str(required=True)
     text_html = fields.Str(dump_only=True)
@@ -30,6 +37,7 @@ class AccountSchema(Schema):
     password = fields.Str(required=True)
 
 
-author_schema = AuthorSchema()
+user_schema = UserSchema()
+stream_schema = StreamSchema()
 post_schema = PostSchema()
 account_schema = AccountSchema()

@@ -1,14 +1,13 @@
-from datetime import datetime
 from typing import Tuple
 
 from flask import request, url_for
-from flask_restful import Resource, abort
+from flask_restful import Resource
 from playhouse.flask_utils import get_object_or_404
 
 from ..ext import api
-from ..models import Author, Post
-from ..schema import author_schema, post_schema
-from ..utils.text import md2html, slugify
+from ..models import Post, Stream, User
+from ..schema import post_schema, stream_schema, user_schema
+from ..utils.text import slugify
 
 
 @api.resource('/posts/recent', endpoint='post.collection.recent')
@@ -26,59 +25,53 @@ class AuthorCollection(Resource):
         page = request.args.get('p', 1, type=int)
         if page < 1:
             page = 1
-        authors = Author.select().order_by(Author.name).paginate(page)
-        return author_schema.dump(authors, many=True)
+        users = User.select().order_by(User.name).paginate(page)
+        return user_schema.dump(users, many=True)
 
 
 @api.resource('/author/<slug>', endpoint='author.item')
 class AutorItem(Resource):
 
     def get(self, slug: str) -> dict:
-        author = get_object_or_404(Author, (Author.slug == slug))
-        return author_schema.dump(author)
+        user = get_object_or_404(User, (User.slug == slug))
+        return user_schema.dump(user)
 
 
-@api.resource('/author/<slug>/posts', endpoint='author.item.posts')
-class AuthorPostCollection(Resource):
+@api.resource('/author/<slug>/streams', endpoint='author.item.streams')
+class AuthorStreamCollection(Resource):
 
     def get(self, slug: str) -> dict:
-        author = get_object_or_404(Author, (Author.slug == slug))
+        user = get_object_or_404(User, (User.slug == slug))
         page = request.args.get('p', 1, type=int)
         if page < 1:
             page = 1
-        posts = Post.select().where(
-            Post.author == author
+        streams = Stream.select().where(
+            Stream.user == user
         ).order_by(Post.date.desc()).paginate(page)
-        return post_schema.dump(posts, many=True)
+        return stream_schema.dump(streams, many=True)
 
     def post(self, slug: str) -> Tuple[dict, int, dict]:
-        author = get_object_or_404(Author, (Author.slug == slug))
+        user = get_object_or_404(User, (User.slug == slug))
         data = post_schema.load(request.get_json())
-        post_date = data.get('date') or datetime.utcnow()
-        year, month, day = post_date.year, post_date.month, post_date.day
-        title = data['title']
-        text = data['text']
-        post = Post.create(
-            author=author, title=title, slug=slugify(title),
-            text=text, text_html=md2html(text),
-            date=post_date, year=year, month=month, day=day,
+        name = data['name']
+        description = data.get('description')
+        stream = Stream.create(
+            user=user, name=name, slug=slugify(name), description=description,
         )
         headers = {
             'Location': url_for(
-                'post.item', author_slug=author.slug, post_slug=post.slug
+                'stream.item', user_slug=user.slug, stream_slug=stream.slug
             )
         }
-        return post_schema.dump(post), 201, headers
+        return stream_schema.dump(stream), 201, headers
 
 
-@api.resource('/post/<author_slug>/<post_slug>', endpoint='post.item')
-class PostItem(Resource):
+@api.resource('/stream/<author_slug>/<stream_slug>', endpoint='stream.item')
+class StreamItem(Resource):
 
-    def get(self, author_slug: str, post_slug: str) -> dict:
-        author = get_object_or_404(Author, (Author.slug == author_slug))
-        if author is None:
-            abort(404)
-        post = Post.get_or_none(Post.author == author, Post.slug == post_slug)
-        if post is None:
-            abort(404)
-        return post_schema.dump(post)
+    def get(self, author_slug: str, stream_slug: str) -> dict:
+        user = get_object_or_404(User, (User.slug == author_slug))
+        stream = get_object_or_404(
+            Stream, (Stream.user == user, Stream.slug == stream_slug)
+        )
+        return stream_schema.dump(stream)

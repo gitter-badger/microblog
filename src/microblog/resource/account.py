@@ -10,8 +10,8 @@ from marshmallow import ValidationError
 from playhouse.flask_utils import get_object_or_404
 
 from ..ext import api
-from ..models import Author, RevokedToken
-from ..schema import account_schema, author_schema
+from ..models import RevokedToken, User
+from ..schema import account_schema, user_schema
 from ..utils.text import slugify
 
 
@@ -22,8 +22,8 @@ class AccountCollection(Resource):
         page = request.args.get('p', 1, type=int)
         if page < 1:
             page = 1
-        authors = Author.select().order_by(Author.name).paginate(page)
-        return author_schema.dump(authors, many=True)
+        users = User.select().order_by(User.name).paginate(page)
+        return user_schema.dump(users, many=True)
 
     def post(self) -> Tuple[dict, int, dict]:
         try:
@@ -31,16 +31,16 @@ class AccountCollection(Resource):
         except ValidationError as e:
             return {'errors': e.messages}, 400
         name = data['name']
-        if Author.get_or_none(Author.name == name):
+        if User.get_or_none(User.name == name):
             return {'message': f'name {name} already taken'}, 400
         slug = slugify(name)
-        author = Author(name=name, slug=slug)
-        author.set_password(data['password'])
-        author.save()
+        user = User(name=name, slug=slug)
+        user.set_password(data['password'])
+        user.save()
         headers = {'Location': url_for('account.item', slug=slug)}
-        rv = author_schema.dump(author)
-        rv['access_token'] = create_access_token(author.id)
-        rv['refresh_token'] = create_refresh_token(author.id)
+        rv = user_schema.dump(user)
+        rv['access_token'] = create_access_token(user.id)
+        rv['refresh_token'] = create_refresh_token(user.id)
         return rv, 201, headers
 
 
@@ -48,8 +48,8 @@ class AccountCollection(Resource):
 class AccountItem(Resource):
 
     def get(self, slug: str) -> dict:
-        author = get_object_or_404(Author, (Author.slug == slug))
-        return author_schema.dump(author)
+        user = get_object_or_404(User, (User.slug == slug))
+        return user_schema.dump(user)
 
 
 @api.resource('/login', endpoint='account.login')
@@ -60,12 +60,12 @@ class Login(Resource):
             data = account_schema.load(request.get_json())
         except ValidationError as e:
             return {'errors': e.messages}, 400
-        author = Author.get_or_none(Author.name == data['name'])
-        if not author or not author.check_password(data['password']):
+        user = User.get_or_none(User.name == data['name'])
+        if not user or not user.check_password(data['password']):
             return {'error': 'no account with that credentials'}, 400
-        rv = author_schema.dump(author)
-        rv['access_token'] = create_access_token(author.id)
-        rv['refresh_token'] = create_refresh_token(author.id)
+        rv = user_schema.dump(user)
+        rv['access_token'] = create_access_token(user.id)
+        rv['refresh_token'] = create_refresh_token(user.id)
         return rv
 
 

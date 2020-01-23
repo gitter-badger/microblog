@@ -1,11 +1,11 @@
 from dotenv import find_dotenv, load_dotenv
 from flask.cli import FlaskGroup
 
-from . import models
-from .app import make_app
+load_dotenv(find_dotenv())
 
 
 def create_app(info):
+    from .app import make_app
     return make_app()
 
 
@@ -13,18 +13,16 @@ cli = FlaskGroup(create_app=create_app)
 cli.help = 'Management script for Microblog backend application'
 
 
-@cli.group(name='db', help='Database related operations')
+@cli.group(name='db')
 def db_ops():
     pass
 
 
-@db_ops.command(name='init', help='Initialize missing database objects')
+@db_ops.command(name='init')
 def db_init():
-    models.Author.create_table()
-    models.RevokedToken.create_table()
-    models.Post.create_table()
+    from .models import db, User, Stream, Post, RevokedToken
+    db.create_tables([User, Stream, Post, RevokedToken])
 
 
 if __name__ == '__main__':
-    load_dotenv(find_dotenv())
     cli()
