@@ -1,6 +1,7 @@
-from typing import Tuple
+from datetime import datetime, timedelta
+from typing import Optional, Tuple
 
-from flask import request, url_for
+from flask import Response, jsonify, request, url_for
 from flask_jwt_extended import (
     create_access_token, create_refresh_token, get_jwt_identity, get_raw_jwt,
     jwt_refresh_token_required, jwt_required,
@@ -10,9 +11,29 @@ from marshmallow import ValidationError
 from playhouse.flask_utils import get_object_or_404
 
 from ..ext import api
-from ..models import RevokedToken, User
+from ..models import RevokedToken, User, db
 from ..schema import account_schema, user_schema
 from ..utils.text import slugify
+
+REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 365 * 4  # roughly 4 years
+
+
+def authentication_response(
+            user: User, code: int = 200, headers: Optional[dict] = None
+        ) -> Response:
+    data = user_schema.dump(user)
+    data['access_token'] = create_access_token(user.id)
+    resp = jsonify(data)
+    resp.status_code = code
+    if headers:
+        resp.headers.extend(headers)
+    cookie_expiry = datetime.utcnow() + timedelta(seconds=REFRESH_TOKEN_MAX_AGE)
+    resp.set_cookie(
+        'refresh_token', value=create_refresh_token(user.id),
+        max_age=REFRESH_TOKEN_MAX_AGE, expires=cookie_expiry, httponly=True,
+        samesite='Strict',
+    )
+    return resp
 
 
 @api.resource('/accounts', endpoint='account.collection')
@@ -33,15 +54,13 @@ class AccountCollection(Resource):
         name = data['name']
         if User.get_or_none(User.name == name):
             return {'message': f'name {name} already taken'}, 400
-        slug = slugify(name)
-        user = User(name=name, slug=slug)
-        user.set_password(data['password'])
-        user.save()
-        headers = {'Location': url_for('account.item', slug=slug)}
-        rv = user_schema.dump(user)
-        rv['access_token'] = create_access_token(user.id)
-        rv['refresh_token'] = create_refresh_token(user.id)
-        return rv, 201, headers
+        with db.atomic():
+            slug = slugify(name)
+            user = User(name=name, slug=slug)
+            user.set_password(data['password'])
+            user.save()
+            headers = {'Location': url_for('account.item', slug=slug)}
+            return authentication_response(user, 201, headers)
 
 
 @api.resource('/account/<slug>', endpoint='account.item')
@@ -55,6 +74,8 @@ class AccountItem(Resource):
 @api.resource('/login', endpoint='account.login')
 class Login(Resource):
 
+    REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 365 * 4  # roughly 4 years
+
     def post(self) -> dict:
         try:
             data = account_schema.load(request.get_json())
@@ -63,10 +84,7 @@ class Login(Resource):
         user = User.get_or_none(User.name == data['name'])
         if not user or not user.check_password(data['password']):
             return {'error': 'no account with that credentials'}, 400
-        rv = user_schema.dump(user)
-        rv['access_token'] = create_access_token(user.id)
-        rv['refresh_token'] = create_refresh_token(user.id)
-        return rv
+        return authentication_response(user)
 
 
 @api.resource('/logout/access', endpoint='account.logout.access')
