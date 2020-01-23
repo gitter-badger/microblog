@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 from flask import Flask
 
@@ -14,6 +15,9 @@ def make_app():
 
 
 def configure_app(app: Flask):
+    app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30*6)
+    app.config['JWT_REFRESH_COOKIE_NAME'] = 'refresh_token'
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['JWT_BLACKLIST_ENABLED'] = True
     app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']

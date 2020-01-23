@@ -54,10 +54,10 @@ class AccountCollection(Resource):
         name = data['name']
         if User.get_or_none(User.name == name):
             return {'message': f'name {name} already taken'}, 400
+        slug = slugify(name)
+        user = User(name=name, slug=slug)
+        user.set_password(data['password'])
         with db.atomic():
-            slug = slugify(name)
-            user = User(name=name, slug=slug)
-            user.set_password(data['password'])
             user.save()
             headers = {'Location': url_for('account.item', slug=slug)}
             return authentication_response(user, 201, headers)
@@ -73,8 +73,6 @@ class AccountItem(Resource):
 
 @api.resource('/login', endpoint='account.login')
 class Login(Resource):
-
-    REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 365 * 4  # roughly 4 years
 
     def post(self) -> dict:
         try:
@@ -104,7 +102,9 @@ class LogoutRefresh(Resource):
     def post(self) -> dict:
         jti = get_raw_jwt()['jti']
         RevokedToken.create(jti=jti)
-        return {'message': 'Refresh token revoked'}
+        resp = jsonify({'message': 'Refresh token revoked'})
+        resp.delete_cookie('refresh_token')
+        return resp
 
 
 @api.resource('/token/refresh', endpoint='account.tokenrefresh')
