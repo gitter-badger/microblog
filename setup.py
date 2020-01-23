@@ -30,14 +30,15 @@ long_description = read('README.md')
 base_reqs = [
     'Flask',
     'Flask-RESTFul',
-    'Pony',
+    'PeeWee',
     'Marshmallow',
     'Flask-JWT-Extended',
-    'passlib[argon2]',
+    'werkzeug',
     'text-unidecode',
     'markdown',
     'click',
     'python-dotenv',
+    'psycopg2-binary',
 ]
 
 test_reqs = [

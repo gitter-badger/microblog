@@ -1,7 +1,7 @@
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
-from pony.flask import Pony
+from playhouse.flask_utils import FlaskDB
 
 api = Api()
-pony = Pony()
+dbwrapper = FlaskDB()
 jwt = JWTManager()

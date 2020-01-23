@@ -1,47 +1,43 @@
-import os
 from datetime import datetime
 
-from pony import orm
+from peewee import CharField, DateTimeField, ForeignKeyField, IntegerField, TextField
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from .sec import pw_context
-
-db = orm.Database()
+from .ext import dbwrapper
 
 
-class Author(db.Entity):
-    name = orm.Required(str, 120, unique=True)
-    password = orm.Required(str, 120)
-    slug = orm.Required(str, 120)
-    posts = orm.Set('Post')
+class Author(dbwrapper.Model):
+    name = CharField(max_length=120, unique=True, null=False)
+    password = TextField(null=False)
+    slug = CharField(max_length=120, null=False)
 
     def check_password(self, password):
-        return pw_context.verify(password, self.password)
+        return check_password_hash(self.password, password)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
 
 
-class RevokedToken(db.Entity):
-    jti = orm.Required(str, 120)
+class RevokedToken(dbwrapper.Model):
+    jti = CharField(max_length=120, null=False, index=True)
 
     @classmethod
     def is_blacklisted(cls, jti: str) -> bool:
-        return cls.get(jti=jti) is not None
+        return cls.get_or_none(cls.jti == jti) is not None
 
 
-class Post(db.Entity):
-    author = orm.Required(Author)
-    title = orm.Required(str, 200)
-    slug = orm.Required(str, 200)
-    text = orm.Required(str)
-    text_html = orm.Optional(str)
-    date = orm.Required(datetime, default=datetime.utcnow)
-    year = orm.Optional(int)
-    month = orm.Optional(int)
-    day = orm.Optional(int)
-    orm.composite_index(year, month)
-    orm.composite_key(author, slug)
+class Post(dbwrapper.Model):
+    author = ForeignKeyField(Author, backref='posts', null=False)
+    title = CharField(max_length=200, null=False)
+    slug = CharField(max_length=200, null=False)
+    text = TextField(null=False)
+    text_html = TextField(null=True)
+    date = DateTimeField(null=False, default=datetime.utcnow)
+    year = IntegerField(null=True)
+    month = IntegerField(null=True)
+    day = IntegerField(null=True)
 
-
-db.bind(
-    provider='sqlite', filename=os.environ.get('DB_FILENAME', ':memory:'),
-    create_db=True,
-)
-db.generate_mapping(create_tables=True)
+    class Meta:
+        indexes = (
+            (('year', 'month', 'day', 'slug', 'author'), True),
+        )
