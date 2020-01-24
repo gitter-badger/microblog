@@ -13,7 +13,10 @@
     "lint": "eslint src"
   },
   "eslintConfig": {
-    "extends": "eslint-config-synacor"
+    "extends": "eslint-config-synacor",
+    "rules": {
+      "indent": ["error", 2]
+    }
   },
   "eslintIgnore": [
     "build/*"

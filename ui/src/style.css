@@ -1,1 +1,6 @@
 @import url('../node_modules/spectre.css/dist/spectre.min.css');
+
+html body {
+  padding: 1rem 2rem;
+  margin: 0 auto;
+}
