@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
-from typing import Optional, Tuple
+from typing import Optional
 
 from flask import Response, jsonify, request, url_for
 from flask_jwt_extended import (
-    create_access_token, create_refresh_token, get_jwt_identity, get_raw_jwt,
+    create_access_token, create_refresh_token, get_jti, get_jwt_identity, get_raw_jwt,
     jwt_refresh_token_required, jwt_required,
 )
 from flask_restful import Resource
@@ -15,7 +15,7 @@ from ..models import RevokedToken, User, db
 from ..schema import account_schema, user_schema
 from ..utils.text import slugify
 
-REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 365 * 4  # roughly 4 years
+REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 365  # 1 year
 
 
 def authentication_response(
@@ -46,7 +46,7 @@ class AccountCollection(Resource):
         users = User.select().order_by(User.name).paginate(page)
         return user_schema.dump(users, many=True)
 
-    def post(self) -> Tuple[dict, int, dict]:
+    def post(self) -> Response:
         try:
             data = account_schema.load(request.get_json())
         except ValidationError as e:
@@ -74,7 +74,7 @@ class AccountItem(Resource):
 @api.resource('/login', endpoint='account.login')
 class Login(Resource):
 
-    def post(self) -> dict:
+    def post(self) -> Response:
         try:
             data = account_schema.load(request.get_json())
         except ValidationError as e:
@@ -85,21 +85,27 @@ class Login(Resource):
         return authentication_response(user)
 
 
-@api.resource('/logout/access', endpoint='account.logout.access')
+@api.resource('/logout', endpoint='account.logout')
 class LogoutAccess(Resource):
 
     @jwt_required
-    def post(self) -> dict:
-        jti = get_raw_jwt()['jti']
-        RevokedToken.create(jti=jti)
-        return {'message': 'Access token revoked'}
+    def post(self) -> Response:
+        access_jti = get_raw_jwt()['jti']
+        rt = request.cookies.get('refresh_token')
+        refresh_jti = get_jti(rt)
+        with db.atomic():
+            RevokedToken.create(jti=access_jti)
+            RevokedToken.create(jti=refresh_jti)
+            resp = jsonify({'message': 'Access token revoked'})
+            resp.delete_cookie('refresh_token')
+            return resp
 
 
 @api.resource('/logout/refresh', endpoint='account.logout.refresh')
 class LogoutRefresh(Resource):
 
     @jwt_refresh_token_required
-    def post(self) -> dict:
+    def post(self) -> Response:
         jti = get_raw_jwt()['jti']
         RevokedToken.create(jti=jti)
         resp = jsonify({'message': 'Refresh token revoked'})

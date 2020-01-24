@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from peewee import (
@@ -7,16 +6,7 @@ from peewee import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-db = SqliteDatabase(
-    os.environ['DB_FILENAME'],
-    pragmas={
-        'journal_mode': 'wal',
-        'cache_size': -1 * 64000,  # 64MB
-        'foreign_keys': 1,
-        'ignore_check_constraints': 0,
-        'synchronous': 0
-    }
-)
+db = SqliteDatabase(None)
 
 
 class User(Model):

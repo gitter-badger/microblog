@@ -1,11 +1,13 @@
 from dotenv import find_dotenv, load_dotenv
 from flask.cli import FlaskGroup
 
+from .app import make_app
+from .models import Post, RevokedToken, Stream, User, db
+
 load_dotenv(find_dotenv())
 
 
 def create_app(info):
-    from .app import make_app
     return make_app()
 
 
@@ -20,7 +22,6 @@ def db_ops():
 
 @db_ops.command(name='init')
 def db_init():
-    from .models import db, User, Stream, Post, RevokedToken
     db.create_tables([User, Stream, Post, RevokedToken])
 
 

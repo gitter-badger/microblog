@@ -4,7 +4,7 @@ from datetime import timedelta
 from flask import Flask
 
 from .ext import api, jwt
-from .models import RevokedToken, db
+from .models import RevokedToken, User, db
 
 
 def make_app():
@@ -27,6 +27,10 @@ def configure_app(app: Flask):
         jti = decrypted_token['jti']
         return RevokedToken.is_blacklisted(jti)
 
+    @jwt.user_loader_callback_loader
+    def load_user(identity):
+        return User.get_or_none(User.id == identity)
+
     @app.before_request
     def db_connect():
         db.connect()
@@ -38,6 +42,16 @@ def configure_app(app: Flask):
 
 
 def configure_extenstions(app: Flask):
+    db.init(
+        os.environ['DB_FILENAME'],
+        pragmas={
+            'journal_mode': 'wal',
+            'cache_size': -1 * 64000,  # 64MB
+            'foreign_keys': 1,
+            'ignore_check_constraints': 0,
+            'synchronous': 0
+        }
+    )
     configure_resources()
     api.init_app(app)
     jwt.init_app(app)
