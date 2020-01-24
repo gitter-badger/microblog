@@ -19,11 +19,13 @@ export default class App extends Component {
       <div id="app">
         <Navbar />
         <div class="container">
-          <Router onChange={this.handleRoute}>
-            <Home path="/" />
-            <Profile path="/profile/" user="me" />
-            <Profile path="/profile/:user" />
-          </Router>
+          <div class="columns">
+            <Router onChange={this.handleRoute}>
+              <Home path="/" />
+              <Profile path="/profile/" user="me" />
+              <Profile path="/profile/:user" />
+            </Router>
+          </div>
         </div>
       </div>
     );
