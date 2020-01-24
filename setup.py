@@ -38,7 +38,6 @@ base_reqs = [
     'markdown',
     'click',
     'python-dotenv',
-    'psycopg2-binary',
 ]
 
 test_reqs = [
