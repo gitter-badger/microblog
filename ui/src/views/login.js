@@ -3,6 +3,7 @@ import { connect } from 'redux-zero/preact';
 import { useLocation } from 'wouter-preact';
 
 import actions from '../actions';
+import Bus from '../utils/Bus';
 
 const mapToProps = ({ user, token }) => ({ user, token });
 
@@ -40,7 +41,7 @@ class LoginBase extends Component {
       })
       .catch((err) => {
         const msg = errcodeMap[err.status];
-        window.flash(msg, 'error');
+        Bus.emit('flash', ({ message: msg, type: 'error' }));
       });
     e.preventDefault();
   }
