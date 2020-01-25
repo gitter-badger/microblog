@@ -10,7 +10,9 @@ import Home from './views/home';
 import Login from './views/login';
 import Bus from './utils/Bus';
 
-window.flash = (message, type='primary') => Bus.emit('flash', ({ message, type }));
+if (typeof window !== 'undefined') {
+  window.flash = (message, type='primary') => Bus.emit('flash', ({ message, type }));
+}
 
 export default function App() {
   return (
