@@ -5,7 +5,12 @@ const mapToProps = ({ user }) => ({ user });
 
 function AccountLink({ user }) {
   if (user) {
-    return <Link href="/account" class="btn btn-link">Account</Link>;
+    return (
+      <span>
+        <Link href="/logout" class="btn btn-link">Logout</Link>
+        <Link href="/account" class="btn btn-link">Account</Link>
+      </span>
+    );
   }
   return <Link href="/login" class="btn btn-link">Login</Link>;
 }
