@@ -10,6 +10,10 @@ class LoginBase extends Component {
   state = { name: '', password: '' };
 
   onSubmit = (e) => {
+    const errcodeMap = {
+      400: 'Invalid data submitted',
+      404: 'No account with that credentials found'
+    };
     e.preventDefault();
     const url = '/api/login';
     fetch(url, {
@@ -35,8 +39,10 @@ class LoginBase extends Component {
         this.setToken(data.token);
         this.redirect('/');
       })
-      // eslint-disable-next-line no-console
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        const msg = errcodeMap[err.status];
+        window.flash(msg, 'error');
+      });
   }
 
   onInputName = (e) => {
