@@ -81,7 +81,7 @@ class Login(Resource):
             return {'errors': e.messages}, 400
         user = User.get_or_none(User.name == data['name'])
         if not user or not user.check_password(data['password']):
-            return {'error': 'no account with that credentials'}, 400
+            return {'error': 'no account with that credentials'}, 404
         return authentication_response(user)
 
 

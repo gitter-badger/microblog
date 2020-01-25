@@ -15,10 +15,8 @@
   "eslintConfig": {
     "extends": "eslint-config-synacor",
     "rules": {
-      "indent": [
-        "error",
-        2
-      ]
+      "indent": ["error", 2],
+      "react/jsx-indent-props": [2, 2]
     }
   },
   "eslintIgnore": [

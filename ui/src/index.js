@@ -15,7 +15,11 @@ export default function App() {
         <Navbar />
       </Provider>
       <Route path="/" component={Home} />
-      <Route path="/login" component={Login} />
+      <Route path="/login">
+        <Provider store={store}>
+          <Login />
+        </Provider>
+      </Route>
     </div>
   );
 }
