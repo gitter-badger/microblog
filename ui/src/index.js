@@ -1,4 +1,4 @@
-import { Route, Switch } from 'wouter-preact';
+import { Route } from 'wouter-preact';
 import { Provider } from 'redux-zero/preact';
 
 import './style';
@@ -6,6 +6,7 @@ import './style';
 import store from './store';
 import Navbar from './components/navbar';
 import Home from './views/home';
+import Login from './views/login';
 
 export default function App() {
   return (
@@ -13,9 +14,8 @@ export default function App() {
       <Provider store={store}>
         <Navbar />
       </Provider>
-      <Switch>
-        <Route path="/" component={Home} />
-      </Switch>
+      <Route path="/" component={Home} />
+      <Route path="/login" component={Login} />
     </div>
   );
 }

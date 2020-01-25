@@ -1,7 +1,7 @@
 const actions = (_store) => ({
-  setUser: (_state, newUser) => ({ user: newUser }),
+  setUser: (_state, user) => ({ user }),
   clearUser: (_state) => ({ user: null }),
-  setToken: (_state, newToken) => ({ token: newToken }),
+  setToken: (_state, token) => ({ token }),
   clearToken: (_state) => ({ token: null })
 });
 
