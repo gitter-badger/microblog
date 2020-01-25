@@ -14,7 +14,6 @@ class LoginBase extends Component {
       400: 'Invalid data submitted',
       404: 'No account with that credentials found'
     };
-    e.preventDefault();
     const url = '/api/login';
     fetch(url, {
       method: 'POST',
@@ -43,6 +42,7 @@ class LoginBase extends Component {
         const msg = errcodeMap[err.status];
         window.flash(msg, 'error');
       });
+    e.preventDefault();
   }
 
   onInputName = (e) => {
